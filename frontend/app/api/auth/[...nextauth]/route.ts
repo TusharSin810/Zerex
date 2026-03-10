@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import prismaClient from "@/app/db";
 
 const handler = NextAuth({
 
@@ -18,6 +19,27 @@ const handler = NextAuth({
                 if(!email){
                     return false;
                 }
+                const userDb = await prismaClient.user.upsert({
+                    where: {
+                        username: email
+                    },
+                    update:{},
+                    create:{
+                        username: email,
+                        provider: "google",
+                        solWallet:{
+                            create:{
+                                publicKey:"",
+                                privateKey:"",
+                            }
+                        },
+                        inrWalet: {
+                            create:{
+                                balance: 0
+                            }
+                        }
+                    }
+                })
             }    
             return true
         },
