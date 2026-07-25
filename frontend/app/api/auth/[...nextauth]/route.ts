@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import prismaClient from "@/app/db";
+import { Keypair } from "@solana/web3.js";
 
 const handler = NextAuth({
 
@@ -19,6 +20,9 @@ const handler = NextAuth({
                 if(!email){
                     return false;
                 }
+                const keypair = Keypair.generate();
+                const pubKey = keypair.publicKey.toBase58();
+                const secKey = keypair.secretKey.toString();
                 const userDb = await prismaClient.user.upsert({
                     where: {
                         username: email
@@ -29,8 +33,8 @@ const handler = NextAuth({
                         provider: "google",
                         solWallet:{
                             create:{
-                                publicKey:"",
-                                privateKey:"",
+                                publicKey:pubKey,
+                                privateKey:secKey,
                             }
                         },
                         inrWalet: {
