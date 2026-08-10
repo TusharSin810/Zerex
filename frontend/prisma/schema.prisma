@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output = "../app/generated"
 }
 
 datasource db {
@@ -16,6 +16,9 @@ datasource db {
 model User {
   id          String     @id @default(uuid())
   username    String     @unique
+  sub         String     @default("")
+  name        String?
+  profilePicture String?
   password    String?
   solWalletId String?
   solWallet   SolWallet?

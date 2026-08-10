@@ -30,8 +30,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Appbar />
-          {children}
+          <div className="min-h-screen flex flex-col bg-cyan-50/80">
+            <Appbar />
+            <main className="flex-1 flex">
+              {children}
+            </main>
+          </div>
         </Providers>
       </body>
     </html>

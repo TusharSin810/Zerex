@@ -1,10 +1,18 @@
-import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import prismaClient from "@/app/db";
 import { Keypair } from "@solana/web3.js";
+import { Session } from "next-auth";
 
-const handler = NextAuth({
+export interface session extends Session {
+    user:{
+        email: string;
+        name: string;
+        image: string;
+        uid: string;
+    }
+}
 
+export const authConfig = {
     secret: process.env.NEXTAUTH_SECRET,
 
     providers: [
@@ -14,7 +22,29 @@ const handler = NextAuth({
         })
     ],
     callbacks: {
-        async signIn({user, account, profile, email, credentials}){
+
+        session:({session, token}: any): session =>{
+            const newSession: session = session as session;
+            if(newSession.user && token.uid){
+                //@ts-ignore
+                newSession.user.uid = token.uid ?? "";
+            }
+            return newSession!;
+        },
+
+        async jwt({token, account, profile}:any) {
+            const user = await prismaClient.user.findFirst({
+                where:{
+                    sub: account?.providerAccountId ?? ""
+                }
+            })
+            if(user) {
+                token.uid = user.id
+            }
+            return token
+        },
+
+        async signIn({user, account, profile, email, credentials}: any){
             if(account?.provider == "google"){
                 const email = user.email;
                 const name = profile?.name;
@@ -24,17 +54,11 @@ const handler = NextAuth({
                 if(!email){
                     return false;
                 }
-<<<<<<< HEAD
-                const keypair = Keypair.generate();
-                const pubKey = keypair.publicKey.toBase58();
-                const secKey = keypair.secretKey.toString();
-=======
 
                 const keypair = Keypair.generate();
                 const publicKey = keypair.publicKey.toBase58();
                 const privateKey = keypair.secretKey;
 
->>>>>>> 8b01f81 (Dashboard Card Created)
                 const userDb = await prismaClient.user.upsert({
                     where: {
                         username: email
@@ -45,15 +69,11 @@ const handler = NextAuth({
                         name: name,
                         profilePicture: profilePic,
                         provider: "google",
+                        sub: account.providerAccountId,
                         solWallet:{
                             create:{
-<<<<<<< HEAD
-                                publicKey:pubKey,
-                                privateKey:secKey,
-=======
                                 publicKey: publicKey,
                                 privateKey: privateKey.toString(),
->>>>>>> 8b01f81 (Dashboard Card Created)
                             }
                         },
                         inrWalet: {
@@ -67,6 +87,4 @@ const handler = NextAuth({
             return true
         },
     }
-})
-
-export {handler as GET, handler as POST}
+}
