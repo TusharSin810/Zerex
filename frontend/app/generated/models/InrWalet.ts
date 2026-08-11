@@ -178,7 +178,7 @@ export type InrWaletGroupByOutputType = {
   _max: InrWaletMaxAggregateOutputType | null
 }
 
-type GetInrWaletGroupByPayload<T extends InrWaletGroupByArgs> = Prisma.PrismaPromise<
+export type GetInrWaletGroupByPayload<T extends InrWaletGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<InrWaletGroupByOutputType, T['by']> &
       {
@@ -1060,6 +1060,11 @@ export type InrWaletFindManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Skip the first `n` InrWalets.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of InrWalets.
+   */
   distinct?: Prisma.InrWaletScalarFieldEnum | Prisma.InrWaletScalarFieldEnum[]
 }
 

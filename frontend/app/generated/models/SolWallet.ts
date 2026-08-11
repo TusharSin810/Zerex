@@ -151,7 +151,7 @@ export type SolWalletGroupByOutputType = {
   _max: SolWalletMaxAggregateOutputType | null
 }
 
-type GetSolWalletGroupByPayload<T extends SolWalletGroupByArgs> = Prisma.PrismaPromise<
+export type GetSolWalletGroupByPayload<T extends SolWalletGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<SolWalletGroupByOutputType, T['by']> &
       {
@@ -1040,6 +1040,11 @@ export type SolWalletFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Skip the first `n` SolWallets.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of SolWallets.
+   */
   distinct?: Prisma.SolWalletScalarFieldEnum | Prisma.SolWalletScalarFieldEnum[]
 }
 
