@@ -3,6 +3,7 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PrimaryButton } from "./Button";
+import { useTokens } from "../hooks/useTokens";
 
 export default function ProfileCard({pubKey}:{
     pubKey : string
@@ -22,7 +23,7 @@ export default function ProfileCard({pubKey}:{
     const name = session.data?.user?.name ?? "";
     const pic = session.data?.user?.image ?? "";
     return(
-            <div className="bg-white h-min w-2/5 p-4 flex flex-col rounded-lg shadow-2xl">
+            <div className="bg-white h-min w-fit lg:min-w-2/5 p-4 flex flex-col rounded-lg shadow-2xl">
                 <Greetings name={name}  image={pic} />
                 <UserAssest publicKey = {pubKey} />
                 <div className="flex gap-4 p-2">
@@ -41,6 +42,7 @@ function UserAssest({publicKey}:{
 
     const [copied, setcopied] = useState(false);
 
+    const {tokenBalances, loading} = useTokens(publicKey);
     useEffect(() => {
         if(copied){
             let timeout = setTimeout(() => {
@@ -52,13 +54,24 @@ function UserAssest({publicKey}:{
         }
     }, [copied])
 
+    if(loading){
+        return (
+            <div>
+                Loading...
+            </div>
+        )
+    }
+
     return(
         <div className="flex flex-col p-2">
             <div className="text-sm">
                 Zerex Account Assests
             </div>
             <div className="flex w-full justify-between">
-                <span>$0.00 USD</span>
+                <div>
+                <span className="text-4xl font-bold">${tokenBalances?.totalBalance.toPrecision(4)}</span>
+                <span className="font-bold text-2xl text-gray-400">USD</span>
+                </div>
                 <PrimaryButton onClick={() => {
                     navigator.clipboard.writeText(publicKey)
                     setcopied(true)
