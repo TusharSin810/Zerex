@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { TokenDetails } from "../lib/constants";
 import axios from "axios";
 
-interface TokenWithbalance extends TokenDetails{
+export interface TokenWithbalance extends TokenDetails{
     balance : string;
     usdBalance : string;
 }
@@ -19,9 +19,14 @@ export function useTokens (address : string){
         axios.get(`/api/tokens?address=${address}`)
             .then(res => {
                 setTokenBalances(res.data);
-                setLoading(false)
             })
-    },[])
+            .catch((e) => {
+                console.log("Failed To Fetch Tokens",e)
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    },[address])
 
     return {
         loading, tokenBalances

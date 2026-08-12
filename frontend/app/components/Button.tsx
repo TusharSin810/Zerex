@@ -5,7 +5,7 @@ export const PrimaryButton = ({children, onClick}: {
     onClick: () => void
 }) => {
     return(
-        <button onClick={onClick} type="button" className="text-white bg-cyan-600 box-border border border-transparent hover:bg-cyan-700 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none rounded-xl cursor-pointer">{children}</button>
+        <button onClick={onClick} type="button" className="text-gray-200 bg-cyan-600 box-border border border-transparent hover:bg-cyan-700 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none rounded-xl cursor-pointer">{children}</button>
     )
 } 
 
@@ -25,3 +25,12 @@ export const SecondaryButton = ({children, onClick, prefix}: {
         </button>
     )
 }
+
+export const InvertedPrimaryButton = ({children, onClick}: {
+    children: React.ReactNode,
+    onClick: () => void
+}) => {
+    return(
+        <button onClick={onClick} type="button" className="text-cyan-600 bg-gray-200 box-border border border-transparent hover:bg-gray-300 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none rounded-xl cursor-pointer">{children}</button>
+    )
+} 

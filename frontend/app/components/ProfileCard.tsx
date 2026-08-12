@@ -2,8 +2,9 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PrimaryButton } from "./Button";
-import { useTokens } from "../hooks/useTokens";
+import { InvertedPrimaryButton, PrimaryButton, SecondaryButton } from "./Button";
+import { TokenWithbalance, useTokens } from "../hooks/useTokens";
+import { TokenList } from "./TokenList";
 
 export default function ProfileCard({pubKey}:{
     pubKey : string
@@ -11,13 +12,27 @@ export default function ProfileCard({pubKey}:{
 
     const session = useSession();
     const router = useRouter();
+    const {tokenBalances, loading} = useTokens(pubKey);
+    const [active , setActive] = useState<"send" | "addFunds" | "withdraw" | "swap">("send");
+
+    const tabs = [
+        {id: "send", label: "Send"},
+        {id: "addFunds", label: "Add Funds"},
+        {id: "withdraw", label: "Withdraw"},
+        {id: "swap", label: "Swap"},
+    ] as const
+
+    useEffect(() => {
+        if(session.status === "unauthenticated"){
+            router.push("/");
+        }
+    },[session.status, router])
 
     if (session.status === "loading"){
         return <div>Loading ...</div>
     }
     if (!session.data?.user){
-        router.push("/")
-        return null
+       return null
     }
 
     const name = session.data?.user?.name ?? "";
@@ -25,24 +40,44 @@ export default function ProfileCard({pubKey}:{
     return(
             <div className="bg-white h-min w-fit lg:min-w-2/5 p-4 flex flex-col rounded-lg shadow-2xl">
                 <Greetings name={name}  image={pic} />
-                <UserAssest publicKey = {pubKey} />
-                <div className="flex gap-4 p-2">
-                    <button>Send</button>
-                    <button>Add Funds</button>
-                    <button>Withdraw</button>
-                    <button>Swap</button>
+                <UserAssest publicKey = {pubKey} loading={loading} tokenBalances={tokenBalances} />
+                <div className="flex gap-2 p-2">
+                    {tabs.map(tab => (
+                        active === tab.id ? (
+                        <PrimaryButton key={tab.id} onClick={() => setActive(tab.id)}>{tab.label}</PrimaryButton> 
+                        ):( 
+                        <InvertedPrimaryButton 
+                        key={tab.id} 
+                        onClick={() => setActive(tab.id)}
+                        >
+                            {tab.label}
+                        </InvertedPrimaryButton>)
+                    ))}
+                </div>
+                <div>
+                    {active === "send" && (
+                    <TokenList tokens={tokenBalances?.tokens || []} />
+                    )}
+
+                    {active === "addFunds" && <div>Funds</div>}
+
+                    {active === "withdraw" && <div>WithDraw</div>}
+
+                    {active === "swap" && <div>Swap</div>}
                 </div>
             </div>
     )
 }
 
-function UserAssest({publicKey}:{
-    publicKey : string
+function UserAssest({publicKey, loading, tokenBalances}:{
+    publicKey : string,
+    loading: boolean,
+    tokenBalances: {
+        totalBalance: number;
+        tokens: TokenWithbalance[];
+    } | null
 }){
-
     const [copied, setcopied] = useState(false);
-
-    const {tokenBalances, loading} = useTokens(publicKey);
     useEffect(() => {
         if(copied){
             let timeout = setTimeout(() => {
