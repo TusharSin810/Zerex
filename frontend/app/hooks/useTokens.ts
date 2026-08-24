@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { TokenDetails } from "../lib/constants";
+import { TokenDetails } from "../lib/tokens";
 import axios from "axios";
 
 export interface TokenWithbalance extends TokenDetails{

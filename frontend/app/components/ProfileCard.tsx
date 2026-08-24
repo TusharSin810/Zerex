@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { InvertedPrimaryButton, PrimaryButton, SecondaryButton } from "./Button";
 import { TokenWithbalance, useTokens } from "../hooks/useTokens";
 import { TokenList } from "./TokenList";
+import { Swap } from "./Swap";
 
 export default function ProfileCard({pubKey}:{
     pubKey : string
@@ -13,7 +14,7 @@ export default function ProfileCard({pubKey}:{
     const session = useSession();
     const router = useRouter();
     const {tokenBalances, loading} = useTokens(pubKey);
-    const [active , setActive] = useState<"send" | "addFunds" | "withdraw" | "swap">("send");
+    const [active , setActive] = useState<"send" | "addFunds" | "withdraw" | "swap" | "token">("token");
 
     const tabs = [
         {id: "send", label: "Send"},
@@ -41,7 +42,7 @@ export default function ProfileCard({pubKey}:{
             <div className="bg-white h-min w-fit lg:min-w-2/5 p-4 flex flex-col rounded-lg shadow-2xl">
                 <Greetings name={name}  image={pic} />
                 <UserAssest publicKey = {pubKey} loading={loading} tokenBalances={tokenBalances} />
-                <div className="flex gap-2 p-2">
+                <div className="flex gap-2 py-2">
                     {tabs.map(tab => (
                         active === tab.id ? (
                         <PrimaryButton key={tab.id} onClick={() => setActive(tab.id)}>{tab.label}</PrimaryButton> 
@@ -56,15 +57,44 @@ export default function ProfileCard({pubKey}:{
                 </div>
                 <div>
                     {active === "send" && (
-                    <TokenList tokens={tokenBalances?.tokens || []} />
+                        <div className="flex flex-col gap-1 w-full">
+                            <div>Send Funds</div>
+                            <div>
+                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
+                            </div>
+                        </div>
                     )}
 
-                    {active === "addFunds" && <div>Funds</div>}
+                    {active === "addFunds" && (
+                        <div className="flex flex-col gap-1 w-full">
+                            <div>Add Funds</div>
+                            <div>
+                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
+                            </div>
+                        </div>
+                    )}
 
-                    {active === "withdraw" && <div>WithDraw</div>}
+                    {active === "withdraw" && (
+                        <div className="flex flex-col gap-1 w-full">
+                            <div>Withdraw</div>
+                            <div>
+                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
+                            </div>
+                        </div>
+                    )}
 
-                    {active === "swap" && <div>Swap</div>}
+                    {active === "swap" && (
+                        <div className="flex flex-col gap-2 w-full">
+                            <Swap tokens={tokenBalances?.tokens || []} />
+                            <div>
+                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
+                            </div>
+                        </div>
+                    )}
                 </div>
+                <div>
+                    {active === "token" && <TokenList tokens={tokenBalances?.tokens || []}/>
+}                </div>
             </div>
     )
 }
