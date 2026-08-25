@@ -45,6 +45,12 @@ export function Swap({tokens, setActive}:{
             };
         }    
         getQuote();
+        const interval = setInterval(() => {
+            getQuote();
+        },300_000)
+        return () => {
+            clearInterval(interval);
+        }
     },[baseAssest, quoteAssest, baseAmount])
 
 

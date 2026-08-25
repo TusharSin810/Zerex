@@ -6,6 +6,7 @@ import { InvertedPrimaryButton, PrimaryButton, SecondaryButton } from "./Button"
 import { TokenWithbalance, useTokens } from "../hooks/useTokens";
 import { TokenList } from "./TokenList";
 import { Swap } from "./Swap";
+import { Loader } from "./loader";
 
 export default function ProfileCard({pubKey}:{
     pubKey : string
@@ -122,7 +123,7 @@ function UserAssest({publicKey, loading, tokenBalances}:{
     if(loading){
         return (
             <div>
-                Loading...
+                <Loader />
             </div>
         )
     }

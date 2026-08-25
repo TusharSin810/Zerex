@@ -15,8 +15,9 @@ export function useTokens (address : string){
 
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        axios.get(`/api/tokens?address=${address}`)
+    const fetchTokens = async() => {
+            setLoading(true);
+            const res = await axios.get(`/api/tokens?address=${address}`)
             .then(res => {
                 setTokenBalances(res.data);
             })
@@ -26,7 +27,20 @@ export function useTokens (address : string){
             .finally(() => {
                 setLoading(false);
             });
-    },[address])
+    }
+
+    useEffect(() => {
+        if(!address) {
+            return;
+        }
+        fetchTokens();
+        const interval = setInterval(() => {
+            fetchTokens();
+        },300_000);
+        return () => {
+            clearInterval(interval);
+        }
+    },[address]);
 
     return {
         loading, tokenBalances
