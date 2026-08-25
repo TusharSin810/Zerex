@@ -4,9 +4,11 @@ import { SUPPORTED_TOKENS , TokenDetails} from "../lib/tokens"
 import { TokenWithbalance } from "../hooks/useTokens";
 import { PrimaryButton, SecondaryButton } from "./Button";
 import axios from "axios";
+import { Loader } from "./loader";
 
-export function Swap({tokens}:{
+export function Swap({tokens, setActive}:{
     tokens: TokenWithbalance[];
+    setActive: any
 }){
 
     const [baseAssest, setBaseAssest] = useState(SUPPORTED_TOKENS[0])
@@ -15,25 +17,31 @@ export function Swap({tokens}:{
     const [quoteAmount, setQuoteAmount] = useState<string>();
     const baseBalance = tokens.find((token) => token.name === baseAssest.name)?.balance ?? "0";
     const quoteBalance = tokens.find((token) => token.name === quoteAssest.name)?.balance ?? "0";
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if(!baseAmount || Number(baseAmount) <= 0){
             setQuoteAmount("0");
+            setLoading(false);
             return;
         }
         if(baseAssest.mint === quoteAssest.mint){
             setQuoteAmount(baseAmount);
+            setLoading(false);
             return;
         }
         const getQuote = async() => {
+            setLoading(true);
             try{
                 const amount = Number(baseAmount) * (10 ** baseAssest.decimals);
                 const response = await axios.get(`https://api.jup.ag/swap/v1/quote?inputMint=${baseAssest.mint}&outputMint=${quoteAssest.mint}&amount=${amount}&slippageBps=50&restrictIntermediateTokens=true&instructionVersion=V2`)
                     .then(res => {
                         setQuoteAmount(String(res.data.outAmount / (10 ** quoteAssest.decimals)))
+                        setLoading(false);
                     })  
             }catch(e){
                 console.log(e);
+                setLoading(false);
             };
         }    
         getQuote();
@@ -50,7 +58,6 @@ export function Swap({tokens}:{
                     }} 
                     selectedToken={baseAssest} 
                     baseBalance={baseBalance}
-                    amount={baseAmount}
                     onAmountChange={(value: string) => {
                         setBaseAmount(value);
                     }}
@@ -69,22 +76,22 @@ export function Swap({tokens}:{
                     selectedToken={quoteAssest} 
                     quoteBalance={quoteBalance}
                     amount={quoteAmount}
+                    loading={loading}
                 />
                 <div className="flex justify-center mt-1">
-                    {Number(baseBalance) < Number(baseAmount) ? (<SecondaryButton onClick={() => {}}>Insufficient Balance</SecondaryButton>):(<PrimaryButton onClick={() => {}}>Swap</PrimaryButton>)}
+                    {Number(baseBalance) < Number(baseAmount) ? (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>):(<PrimaryButton onClick={() => {}}>Swap</PrimaryButton>)}
                 </div>
             </div>
         </div>
     )
 }
 
-function SwapInputRow({onSelect, onAmountChange, selectedToken, baseBalance, amount}:{
+function SwapInputRow({onSelect, onAmountChange, selectedToken, baseBalance}:{
     onSelect: (assest: TokenDetails) => void;
     onAmountChange: (value: string) => void;
     selectedToken : TokenDetails;
     baseBalance: string;
-    amount?: string;
-}){
+    }){
     return(
         <div className="border border-b-0 flex justify-between p-2 rounded-t-2xl border-gray-300 bg-white items-center">
             <div className="flex flex-col gap-0.5 w-max">
@@ -103,11 +110,12 @@ function SwapInputRow({onSelect, onAmountChange, selectedToken, baseBalance, amo
     )
 }
 
-function SwapOutputRow({onSelect, selectedToken, quoteBalance,amount}:{
+function SwapOutputRow({onSelect, selectedToken, quoteBalance,amount,loading}:{
     onSelect: (assest: TokenDetails) => void;
     selectedToken : TokenDetails;
     quoteBalance: string;
     amount?: string;
+    loading: boolean;
 }){
     return(
         <div className="border flex justify-between rounded-b-2xl p-2 border-gray-300 bg-white">
@@ -121,7 +129,7 @@ function SwapOutputRow({onSelect, selectedToken, quoteBalance,amount}:{
             <div className={`flex justify-center items-center p-2 text-4xl ${
                 Number(amount) > 0 ? "text-black" : "text-gray-500"
             }`}>
-                {Number(amount) > 0 ? (Number(amount).toPrecision(4)) : ("0")}
+                {loading ? (<Loader />) : Number(amount) > 0 ? (Number(amount).toPrecision(4)) : ("0")}
             </div>
         </div>
     )
