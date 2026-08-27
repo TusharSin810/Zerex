@@ -34,7 +34,7 @@ export function Swap({tokens, setActive}:{
             setLoading(true);
             try{
                 const amount = Number(baseAmount) * (10 ** baseAssest.decimals);
-                const response = await axios.get(`https://api.jup.ag/swap/v1/quote?inputMint=${baseAssest.mint}&outputMint=${quoteAssest.mint}&amount=${amount}&slippageBps=50&restrictIntermediateTokens=true&instructionVersion=V2`)
+                const response = await axios.get(`https://api.jup.ag/swap/v2/order?inputMint=${baseAssest.mint}&outputMint=${quoteAssest.mint}&amount=${amount}`)
                     .then(res => {
                         setQuoteAmount(String(res.data.outAmount / (10 ** quoteAssest.decimals)))
                         setLoading(false);

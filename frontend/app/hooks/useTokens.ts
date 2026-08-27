@@ -36,7 +36,7 @@ export function useTokens (address : string){
         fetchTokens();
         const interval = setInterval(() => {
             fetchTokens();
-        },300_000);
+        },30_000_000);
         return () => {
             clearInterval(interval);
         }
