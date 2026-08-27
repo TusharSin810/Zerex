@@ -6,9 +6,10 @@ import { PrimaryButton, SecondaryButton } from "./Button";
 import axios from "axios";
 import { Loader } from "./loader";
 
-export function Swap({tokens, setActive}:{
+export function Swap({tokens, setActive, pubKey}:{
     tokens: TokenWithbalance[];
-    setActive: any
+    setActive: any;
+    pubKey : string
 }){
 
     const [baseAssest, setBaseAssest] = useState(SUPPORTED_TOKENS[0])
@@ -18,6 +19,7 @@ export function Swap({tokens, setActive}:{
     const baseBalance = tokens.find((token) => token.name === baseAssest.name)?.balance ?? "0";
     const quoteBalance = tokens.find((token) => token.name === quoteAssest.name)?.balance ?? "0";
     const [loading, setLoading] = useState(true);
+    const [requestId, setRequestId] = useState<string>();
 
     useEffect(() => {
         if(!baseAmount || Number(baseAmount) <= 0){
@@ -34,10 +36,16 @@ export function Swap({tokens, setActive}:{
             setLoading(true);
             try{
                 const amount = Number(baseAmount) * (10 ** baseAssest.decimals);
-                const response = await axios.get(`https://api.jup.ag/swap/v2/order?inputMint=${baseAssest.mint}&outputMint=${quoteAssest.mint}&amount=${amount}`)
+                const response = await axios.post("/api/swap/order",{
+                    inputMint: baseAssest.mint,
+                    outputMint: quoteAssest.mint,
+                    amount: amount,
+                    taker: pubKey
+                })
                     .then(res => {
                         setQuoteAmount(String(res.data.outAmount / (10 ** quoteAssest.decimals)))
                         setLoading(false);
+                        setRequestId(res.data.requestId)
                     })  
             }catch(e){
                 console.log(e);
@@ -47,7 +55,7 @@ export function Swap({tokens, setActive}:{
         getQuote();
         const interval = setInterval(() => {
             getQuote();
-        },300_000)
+        },3_00_000)
         return () => {
             clearInterval(interval);
         }
@@ -85,7 +93,11 @@ export function Swap({tokens, setActive}:{
                     loading={loading}
                 />
                 <div className="flex justify-center mt-1">
-                    {Number(baseBalance) < Number(baseAmount) ? (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>):(<PrimaryButton onClick={() => {}}>Swap</PrimaryButton>)}
+                    {Number(baseBalance) < Number(baseAmount) 
+                    ? 
+                    (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>)
+                    :
+                    (<PrimaryButton onClick={() => {axios.post("api/swap",{requestId})}}>Swap</PrimaryButton>)}
                 </div>
             </div>
         </div>

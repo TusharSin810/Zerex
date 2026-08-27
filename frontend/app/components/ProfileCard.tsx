@@ -86,7 +86,7 @@ export default function ProfileCard({pubKey}:{
 
                     {active === "swap" && (
                         <div className="flex flex-col gap-2 w-full">
-                            <Swap tokens={tokenBalances?.tokens || []} setActive={setActive} />
+                            <Swap tokens={tokenBalances?.tokens || []} setActive={setActive} pubKey={pubKey}/>
                             <div className="flex justify-center">
                                 <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
                             </div>
