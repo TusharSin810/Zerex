@@ -19,7 +19,12 @@ export function Swap({tokens, setActive, pubKey}:{
     const baseBalance = tokens.find((token) => token.name === baseAssest.name)?.balance ?? "0";
     const quoteBalance = tokens.find((token) => token.name === quoteAssest.name)?.balance ?? "0";
     const [loading, setLoading] = useState(true);
-    const [requestId, setRequestId] = useState<string>();
+    const [order, setOrder] = useState<{
+        requestId: string;
+        transaction: string;
+        lastValidBlockHeight: string;
+    }>();
+
 
     useEffect(() => {
         if(!baseAmount || Number(baseAmount) <= 0){
@@ -45,7 +50,11 @@ export function Swap({tokens, setActive, pubKey}:{
                     .then(res => {
                         setQuoteAmount(String(res.data.outAmount / (10 ** quoteAssest.decimals)))
                         setLoading(false);
-                        setRequestId(res.data.requestId)
+                        setOrder({
+                            requestId: res.data.requestId,
+                            transaction: res.data.transaction,
+                            lastValidBlockHeight: res.data.lastValidBlockHeight
+                        });
                     })  
             }catch(e){
                 console.log(e);
@@ -97,7 +106,7 @@ export function Swap({tokens, setActive, pubKey}:{
                     ? 
                     (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>)
                     :
-                    (<PrimaryButton onClick={() => {axios.post("api/swap",{requestId})}}>Swap</PrimaryButton>)}
+                    (<PrimaryButton onClick={() => {axios.post("api/swap/execute",{order})}}>Swap</PrimaryButton>)}
                 </div>
             </div>
         </div>
@@ -117,7 +126,7 @@ function SwapInputRow({onSelect, onAmountChange, selectedToken, baseBalance}:{
                 <div className="w-fit">
                     <AssestSelector selectedToken={selectedToken} onSelect={onSelect}/>
                 </div>
-                <small className="text-gray-600">Current Balance: {baseBalance} {selectedToken.name}</small>
+                <small className="text-gray-600">Current Balance: {Number(baseBalance).toPrecision(4)} {selectedToken.name}</small>
             </div>
             <div>
                 <input onChange={(e) => {
@@ -142,7 +151,7 @@ function SwapOutputRow({onSelect, selectedToken, quoteBalance,amount,loading}:{
                 <div className="w-fit">
                     <AssestSelector selectedToken={selectedToken} onSelect={onSelect}/>
                 </div>
-                <small className="text-gray-600">Current Balance: {quoteBalance} {selectedToken.name}</small>
+                <small className="text-gray-600">Current Balance: {Number(quoteBalance).toPrecision(4)} {selectedToken.name}</small>
             </div>
             <div className={`flex justify-center items-center p-2 text-4xl ${
                 Number(amount) > 0 ? "text-black" : "text-gray-500"

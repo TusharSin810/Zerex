@@ -24,24 +24,26 @@ export const authConfig = {
     callbacks: {
 
         session:({session, token}: any): session =>{
-            const newSession: session = session as session;
-            if(newSession.user && token.uid){
-                //@ts-ignore
-                newSession.user.uid = token.uid ?? "";
+            if (session.user && token.uid) {
+                session.user.uid = token.uid;
             }
-            return newSession!;
+            return session;
         },
 
         async jwt({token, account, profile}:any) {
-            const user = await prismaClient.user.findFirst({
-                where:{
-                    sub: account?.providerAccountId ?? ""
+            if (account?.provider === "google") {
+                const user = await prismaClient.user.findFirst({
+                    where: {
+                        sub: account.providerAccountId,
+                    },
+                });
+
+                if (user) {
+                    token.uid = user.id;
                 }
-            })
-            if(user) {
-                token.uid = user.id
             }
-            return token
+
+            return token;
         },
 
         async signIn({user, account, profile, email, credentials}: any){
@@ -63,7 +65,11 @@ export const authConfig = {
                     where: {
                         username: email
                     },
-                    update:{},
+                    update:{
+                        name:name,
+                        profilePicture: profilePic,
+                        sub: account.providerAccountId,
+                    },
                     create:{
                         username: email,
                         name: name,

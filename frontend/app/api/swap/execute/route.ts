@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest){
     const data : {
-        requestId: string;
-        signedTransaction: string;
+        order:{
+            requestId: string;
+            transaction: string;
+            lastValidBlockHeight: string;
+        }
     } = await req.json();
 
-    if(!data.requestId){
+    if(!data.order.requestId){
         return NextResponse.json({
             message: "Error Fetching Quote From Chain"
         })
@@ -19,8 +22,7 @@ export async function POST(req: NextRequest){
         },
         body: JSON.stringify({
         signedTransaction: '<string>',
-        requestId: '<string>',
-        lastValidBlockHeight: '<string>'
+        requestId: data.order.requestId,
         })
     };
 
