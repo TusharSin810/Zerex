@@ -7,6 +7,8 @@ import { TokenWithbalance, useTokens } from "../hooks/useTokens";
 import { TokenList } from "./TokenList";
 import { Swap } from "./Swap";
 import { Loader } from "./loader";
+import { Funds } from "./Funds";
+import { Send } from "./Send";
 
 export default function ProfileCard({pubKey}:{
     pubKey : string
@@ -59,25 +61,21 @@ export default function ProfileCard({pubKey}:{
                 <div>
                     {active === "send" && (
                         <div className="flex flex-col gap-1 w-full">
-                            <div>Send Funds</div>
-                            <div>
-                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
-                            </div>
+                            <Send tokens={tokenBalances!.tokens} setActive={setActive}/>
                         </div>
                     )}
 
                     {active === "addFunds" && (
                         <div className="flex flex-col gap-1 w-full">
-                            <div>Add Funds</div>
-                            <div>
-                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
-                            </div>
+                            <Funds publicKey={pubKey}/>
                         </div>
                     )}
 
                     {active === "withdraw" && (
                         <div className="flex flex-col gap-1 w-full">
-                            <div>Withdraw</div>
+                            <div className="text-gray-800 font-semibold text-sm bg-gray-100 p-4 rounded-xl">
+                                Sorry, we don't support this feature yet.
+                            </div>
                             <div>
                                 <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
                             </div>
@@ -87,9 +85,6 @@ export default function ProfileCard({pubKey}:{
                     {active === "swap" && (
                         <div className="flex flex-col gap-2 w-full">
                             <Swap tokens={tokenBalances?.tokens || []} setActive={setActive} pubKey={pubKey}/>
-                            <div className="flex justify-center">
-                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
-                            </div>
                         </div>
                     )}
                 </div>

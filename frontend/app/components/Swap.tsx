@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { SUPPORTED_TOKENS , TokenDetails} from "../lib/tokens"
 import { TokenWithbalance } from "../hooks/useTokens";
-import { PrimaryButton, SecondaryButton } from "./Button";
+import { InvertedPrimaryButton, PrimaryButton, SecondaryButton } from "./Button";
 import axios from "axios";
 import { Loader } from "./loader";
 
@@ -132,7 +132,8 @@ export function Swap({tokens, setActive, pubKey}:{
                     amount={quoteAmount}
                     loading={loading}
                 />
-                <div className="flex justify-center mt-1">
+                <div className="flex justify-between mt-1 w-full p-2">
+                    <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
                     {Number(baseBalance) < Number(baseAmount) 
                     ? 
                     (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>)
