@@ -1,11 +1,14 @@
 "use client";
 
-export const PrimaryButton = ({children, onClick}: {
+export const PrimaryButton = ({children, onClick, disabled}: {
     children: React.ReactNode,
-    onClick: () => void
+    onClick: () => void,
+    disabled?: boolean,
 }) => {
     return(
-        <button onClick={onClick} type="button" className="text-gray-200 bg-cyan-600 box-border border border-transparent hover:bg-cyan-700 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none rounded-xl cursor-pointer">{children}</button>
+        <button onClick={onClick} disabled={disabled} type="button" className="disabled:opacity-50 disabled:cursor-not-allowed text-gray-200 bg-cyan-600 box-border border border-transparent hover:bg-cyan-700 focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2 focus:outline-none rounded-xl cursor-pointer">
+            {children}
+        </button>
     )
 } 
 

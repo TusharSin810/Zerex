@@ -69,7 +69,38 @@ export function Swap({tokens, setActive, pubKey}:{
             clearInterval(interval);
         }
     },[baseAssest, quoteAssest, baseAmount])
+    
+    const handleSwap = async () => {
+        
+        if (!order?.transaction) {
+            console.error("No transaction available");
+            return;
+        }
 
+        try {
+            setLoading(true);
+        
+            const response = await axios.post("/api/swap/execute", {
+                order,
+            });
+        
+            const data = response.data;
+        
+            if (data.error) {
+                console.error("Swap failed:", data.error);
+                return;
+            }
+        
+            console.log("Swap successful:", data);
+        
+            setActive("tokens");
+        
+        } catch (error) {
+            console.error("Swap failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return(
         <div className="p-2 bg-gray-100 shadow-lg rounded-xl flex flex-col gap-1">
@@ -106,7 +137,7 @@ export function Swap({tokens, setActive, pubKey}:{
                     ? 
                     (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>)
                     :
-                    (<PrimaryButton onClick={() => {axios.post("api/swap/execute",{order})}}>Swap</PrimaryButton>)}
+                    (<PrimaryButton onClick={handleSwap} disabled={loading}>{loading ? <Loader/> : "Swap"}</PrimaryButton>)}
                 </div>
             </div>
         </div>
