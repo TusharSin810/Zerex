@@ -152,7 +152,7 @@ function SwapInputRow({onSelect, onAmountChange, selectedToken, baseBalance}:{
     baseBalance: string;
     }){
     return(
-        <div className="border border-b-0 flex justify-between p-2 rounded-t-2xl border-gray-300 bg-white items-center">
+        <div className="border border-b-0 flex justify-between p-2 rounded-t-2xl border-gray-300 bg-gray-50 items-center">
             <div className="flex flex-col gap-0.5 w-max">
                 <label className="text-xs font-semibold">You Pay:</label>
                 <div className="w-fit">
@@ -177,7 +177,7 @@ function SwapOutputRow({onSelect, selectedToken, quoteBalance,amount,loading}:{
     loading: boolean;
 }){
     return(
-        <div className="border flex justify-between rounded-b-2xl p-2 border-gray-300 bg-white">
+        <div className="border flex justify-between rounded-b-2xl p-2 border-gray-300 bg-gray-50">
             <div className="flex flex-col gap-0.5 w-max">
                 <label className="text-xs font-semibold">You Receive:</label>
                 <div className="w-fit">

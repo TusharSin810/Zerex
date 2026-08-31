@@ -50,7 +50,7 @@ export function Send({
     };
 
     return (
-        <div className="w-full p-2 flex flex-col gap-2">
+        <div className="w-full p-2 flex flex-col gap-2 bg-gray-100 rounded-xl">
 
             <h1 className="text-xl font-bold">
                 Send Funds

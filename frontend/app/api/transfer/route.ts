@@ -1,20 +1,24 @@
 import prismaClient from "@/app/db";
 import { authConfig, session } from "@/app/lib/auth";
 import { connection } from "@/app/lib/constants";
-import { createTransferInstruction, getOrCreateAssociatedTokenAccount } from "@solana/spl-token";
+import { createAssociatedTokenAccountInstruction, createTransferInstruction, getAssociatedTokenAddress} from "@solana/spl-token";
 import { Keypair, PublicKey, sendAndConfirmTransaction, SystemProgram, Transaction } from "@solana/web3.js";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 
-export async function POST(request: NextRequest){
-    try{
+const NATIVE_SOL_MINT =
+    "So11111111111111111111111111111111111111112";
+
+export async function POST(request: NextRequest) {
+    try {
         const session = await getServerSession(authConfig);
-        if(!session?.user.uid){
+
+        if (!session?.user?.uid) {
             return NextResponse.json(
-                {error:"Unauthorized to Send Funds"},
-                {status:401}
-            )
+                { error: "Unauthorized to send funds" },
+                { status: 401 }
+            );
         }
 
         const {
@@ -30,7 +34,7 @@ export async function POST(request: NextRequest){
                 { status: 400 }
             );
         }
-        
+
         let recipientPublicKey: PublicKey;
 
         try {
@@ -43,82 +47,129 @@ export async function POST(request: NextRequest){
         }
 
         const keyPair = await getKeypair(session);
+
         if (!keyPair) {
             return NextResponse.json(
-            { error: "Wallet Not Found" },
-            { status: 404 }
+                { error: "Wallet not found" },
+                { status: 404 }
             );
         }
 
+        const amountNumber = Number(amount);
 
-        if(mint === "So11111111111111111111111111111111111111112"){
-            const transfer = await SolTransfer(amount, keyPair, recipientPublicKey);
-            if(!transfer.success){
-                return NextResponse.json({
-                    error: transfer.error,
-                    
-                },{status:transfer.status})
-            }
-        }
-        const mintPubkey = new PublicKey(mint);
-        const tokenAmount = BigInt(Math.floor(Number(amount) * 10 ** decimals))    
-    
-        if(tokenAmount <=0){
-            return NextResponse.json({
-                error: "Invalid Amount"
-            },{status: 400})
-        }
-
-         const sourceAccount =
-            await getOrCreateAssociatedTokenAccount(
-                connection,
-                keyPair,
-                mintPubkey,
-                keyPair.publicKey
-            );
-
-        const destinationAccount =
-            await getOrCreateAssociatedTokenAccount(
-                connection,
-                keyPair,
-                mintPubkey,
-                recipientPublicKey
-            );
-
-        if (BigInt(sourceAccount.amount) < tokenAmount) {
+        if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
             return NextResponse.json(
-                { error: "Insufficient token balance" },
+                { error: "Invalid amount" },
                 { status: 400 }
             );
         }
 
-        const transaction = new Transaction().add(
+        if (mint === NATIVE_SOL_MINT) {
+            const result = await SolTransfer(
+                amountNumber,
+                keyPair,
+                recipientPublicKey
+            );
+
+            return NextResponse.json(
+                result,
+                {
+                    status: result.success ? 200 : result.status,
+                }
+            );
+        }
+
+        if (!Number.isInteger(decimals) || decimals < 0) {
+            return NextResponse.json(
+                { error: "Invalid token decimals" },
+                { status: 400 }
+            );
+        }
+
+        const mintPublicKey = new PublicKey(mint);
+
+        const tokenAmount = BigInt(
+            Math.floor(
+                amountNumber * 10 ** decimals
+            )
+        );
+
+        if (tokenAmount <= 0) {
+            return NextResponse.json(
+                { error: "Invalid amount" },
+                { status: 400 }
+            );
+        }
+
+        const sourceAta = await getAssociatedTokenAddress(
+            mintPublicKey,
+            keyPair.publicKey
+        );
+
+        const sourceAccountInfo =
+            await connection.getAccountInfo(sourceAta);
+
+        if (!sourceAccountInfo) {
+            return NextResponse.json(
+                { error: "You don't have an account for this token" },
+                { status: 400 }
+            );
+        }
+
+        const destinationAta =
+            await getAssociatedTokenAddress(
+                mintPublicKey,
+                recipientPublicKey
+            );
+
+        const destinationAccountInfo =
+            await connection.getAccountInfo(destinationAta);
+
+        const transaction = new Transaction();
+
+        if (!destinationAccountInfo) {
+            transaction.add(
+                createAssociatedTokenAccountInstruction(
+                    keyPair.publicKey,
+                    destinationAta,
+                    recipientPublicKey,
+                    mintPublicKey
+                )
+            );
+        }
+
+        transaction.add(
             createTransferInstruction(
-                sourceAccount.address,
-                destinationAccount.address,
+                sourceAta,
+                destinationAta,
                 keyPair.publicKey,
                 tokenAmount
             )
         );
 
-        const signature = await sendAndConfirmTransaction(
-            connection,
-            transaction,
-            [keyPair]
-        );
-         
+        const signature =
+            await sendAndConfirmTransaction(
+                connection,
+                transaction,
+                [keyPair]
+            );
+
         return NextResponse.json({
             success: true,
             signature,
         });
 
-    }catch(error){
-        console.log("Transfer Error : ", error);
-        return(
-            NextResponse.json({
-                error: "Transfer Failed",
-            },{status: 500})
-        )
+    } catch (error) {
+        console.error("Transfer Error:", error);
+
+        return NextResponse.json(
+            {
+                error: "Transfer failed",
+            },
+            {
+                status: 500,
+            }
+        );
     }
 }
 

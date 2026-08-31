@@ -16,9 +16,9 @@ export function Funds({publicKey}:{
             }
         }, [copied])
     return(
-        <div>
+        <div className="bg-gray-100 p-2 rounded-xl">
             <h1 className="text-2xl font-bold">Add Funds</h1>
-            <div className="bg-gray-100 p-4 rounded-xl flex flex-col gap-1">
+            <div className="bg-gray-200 p-2 rounded-xl flex flex-col gap-1">
                 <p className="text-xl font-semibold mb-2">Send SOL or supported tokens to:</p>
                 <p className="font-serif">{publicKey}</p>
                 <div className="mb-2">

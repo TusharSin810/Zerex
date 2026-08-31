@@ -7,7 +7,10 @@ export interface TokenWithbalance extends TokenDetails{
     usdBalance : string;
 }
 
-export function useTokens (address : string){
+export function useTokens (
+    address : string, 
+    active :"send" | "addFunds" | "withdraw" | "swap" | "token"
+){
     const [tokenBalances, setTokenBalances] = useState<{
         totalBalance: number,
         tokens: TokenWithbalance[]
@@ -30,17 +33,17 @@ export function useTokens (address : string){
     }
 
     useEffect(() => {
-        if(!address) {
+        if(!address || active !== "token") {
             return;
         }
-        fetchTokens();
+        setTimeout(()=>{fetchTokens()},5000);
         const interval = setInterval(() => {
             fetchTokens();
-        },30_000_000);
+        },300_000);
         return () => {
             clearInterval(interval);
         }
-    },[address]);
+    },[address,active]);
 
     return {
         loading, tokenBalances

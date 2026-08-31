@@ -16,8 +16,8 @@ export default function ProfileCard({pubKey}:{
 
     const session = useSession();
     const router = useRouter();
-    const {tokenBalances, loading} = useTokens(pubKey);
     const [active , setActive] = useState<"send" | "addFunds" | "withdraw" | "swap" | "token">("token");
+    const {tokenBalances, loading} = useTokens(pubKey,active);
 
     const tabs = [
         {id: "send", label: "Send"},
@@ -68,6 +68,9 @@ export default function ProfileCard({pubKey}:{
                     {active === "addFunds" && (
                         <div className="flex flex-col gap-1 w-full">
                             <Funds publicKey={pubKey}/>
+                            <div>
+                                <InvertedPrimaryButton onClick={() => {setActive("token")}}>Cancel</InvertedPrimaryButton>
+                            </div>
                         </div>
                     )}
 
