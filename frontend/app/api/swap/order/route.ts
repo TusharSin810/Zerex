@@ -17,14 +17,12 @@ export async function POST(req: NextResponse){
                 status: 401 
             });
         }
-        console.log(taker);
         const url = `https://api.jup.ag/swap/v2/order?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&taker=${taker}`
                 
         const response = await fetch(url, {
             method: "GET",
         });
         const data = await response.json()
-        console.log(data)
         return(
             NextResponse.json(data,{
                 status: response.status

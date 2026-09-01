@@ -138,7 +138,7 @@ export function Swap({tokens, setActive, pubKey}:{
                     ? 
                     (<SecondaryButton onClick={() => {setActive("addFunds")}}>Insufficient Balance</SecondaryButton>)
                     :
-                    (<PrimaryButton onClick={handleSwap} disabled={loading}>{loading ? <Loader/> : "Swap"}</PrimaryButton>)}
+                    (<PrimaryButton onClick={handleSwap} disabled={loading || !baseAmount}>{loading ? <Loader/> : "Swap"}</PrimaryButton>)}
                 </div>
             </div>
         </div>
